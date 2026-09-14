@@ -1,0 +1,76 @@
+import { useEffect, useRef, useState } from "react";
+import { AppState, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import * as LocalAuthentication from "expo-local-authentication";
+
+import { useAppData } from "@/lib/app-store";
+
+export function AppLock() {
+  const { settings } = useAppData();
+  const [locked, setLocked] = useState(settings.pinEnabled || settings.biometricEnabled);
+  const [pin, setPin] = useState("");
+  const backgroundAt = useRef<number | null>(null);
+
+  useEffect(() => {
+    setLocked(settings.pinEnabled || settings.biometricEnabled);
+  }, [settings.pinEnabled, settings.biometricEnabled]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", async (nextState) => {
+      if (nextState === "background") backgroundAt.current = Date.now();
+      if (nextState === "active" && backgroundAt.current && Date.now() - backgroundAt.current > 30_000 && (settings.pinEnabled || settings.biometricEnabled)) {
+        setLocked(true);
+      }
+      if (nextState === "active") backgroundAt.current = null;
+    });
+    return () => subscription.remove();
+  }, [settings.biometricEnabled, settings.pinEnabled]);
+
+  useEffect(() => {
+    if (!locked || !settings.biometricEnabled || Platform.OS === "web") return;
+    void unlockBiometric();
+  }, [locked, settings.biometricEnabled]);
+
+  async function unlockBiometric() {
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    const enrolled = await LocalAuthentication.isEnrolledAsync();
+    if (!hasHardware || !enrolled) return;
+    const result = await LocalAuthentication.authenticateAsync({ promptMessage: "افتح صبر إلكترونكس" });
+    if (result.success) setLocked(false);
+  }
+
+  function unlockPin() {
+    if (settings.pin && pin === settings.pin) {
+      setPin("");
+      setLocked(false);
+    }
+  }
+
+  if (!locked) return null;
+  return (
+    <Modal visible transparent animationType="fade">
+      <View style={styles.overlay}>
+        <View style={styles.card}>
+          <Text style={styles.brand}>صبر إلكترونكس</Text>
+          <Text style={styles.title}>التطبيق مقفل</Text>
+          <Text style={styles.subtitle}>أدخل رمز PIN للمتابعة أو استخدم البصمة.</Text>
+          {settings.pinEnabled && <TextInput value={pin} onChangeText={setPin} onSubmitEditing={unlockPin} keyboardType="number-pad" secureTextEntry maxLength={6} placeholder="رمز PIN" placeholderTextColor="#9CA3AF" style={styles.input} textAlign="center" />}
+          {settings.pinEnabled && <Pressable onPress={unlockPin} style={({ pressed }) => [styles.button, pressed && { opacity: 0.8 }]}><Text style={styles.buttonText}>فتح التطبيق</Text></Pressable>}
+          {settings.biometricEnabled && <Pressable onPress={() => void unlockBiometric()} style={({ pressed }) => [styles.secondary, pressed && { opacity: 0.7 }]}><Text style={styles.secondaryText}>استخدام البصمة أو Face ID</Text></Pressable>}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  overlay: { flex: 1, backgroundColor: "rgba(17,24,39,0.75)", alignItems: "center", justifyContent: "center", padding: 24 },
+  card: { width: "100%", maxWidth: 360, backgroundColor: "#FFFDF9", borderRadius: 24, padding: 28, alignItems: "center" },
+  brand: { color: "#9A661D", fontSize: 14, fontWeight: "800", marginBottom: 12 },
+  title: { color: "#1F2937", fontSize: 26, fontWeight: "800", marginBottom: 8 },
+  subtitle: { color: "#6B7280", fontSize: 14, lineHeight: 22, textAlign: "center", marginBottom: 20 },
+  input: { width: "100%", borderWidth: 1, borderColor: "#E6E1D8", borderRadius: 14, backgroundColor: "#FFF", padding: 14, fontSize: 20, marginBottom: 12, color: "#1F2937" },
+  button: { width: "100%", backgroundColor: "#9A661D", borderRadius: 14, padding: 15, alignItems: "center" },
+  buttonText: { color: "#FFF", fontSize: 15, fontWeight: "800" },
+  secondary: { padding: 14, marginTop: 6 },
+  secondaryText: { color: "#9A661D", fontWeight: "700", fontSize: 14 },
+});
