@@ -35,7 +35,17 @@ npx eas build --platform android
 npx eas build --platform ios
 ```
 
-يتطلب بناء iOS حساب Apple Developer، بينما يمكن اختبار Android عبر Expo Go أو development build. ميزات الكاميرا والبصمة والإشعارات والتصدير تعمل على الأجهزة الأصلية، وبعضها يحتاج development build بدل Expo Go.
+يتطلب بناء iOS حساب Apple Developer، بينما يمكن اختبار Android عبر Expo Go أو development build. ميزات الكاميرا والبصمة والإشعارات والتصدير تعمل على الأجهزة الأصلية، وبعضها يحتاج development build بدل xpo Go.
+
+
+## تحميل التطبيق
+
+يمكن تحميل نسخة Android الجاهزة للتثبيت من الرابط التالي:
+
+[تحميل تطبيق صبر إلكترونكس](https://api.github.com/repos/user-hasan/sabr-electronics/actions/artifacts/10374126649/zip )
+
+بعد تنزيل الملف، فك ضغطه ثم ثبّت ملف APK على جهاز Android.
+
 
 ## ملاحظات الخصوصية
 
