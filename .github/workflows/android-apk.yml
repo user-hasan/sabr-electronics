@@ -2,14 +2,19 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+  release:
+    types: [published]
 
 permissions:
   contents: read
 
 env:
   NODE_VERSION: 22
+
+# Prevent duplicate APK builds from running at the same time.
+concurrency:
+  group: android-apk-build
+  cancel-in-progress: true
 
 jobs:
   build-apk:
@@ -20,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -41,7 +48,6 @@ jobs:
       - name: Generate native Android project
         run: pnpm exec expo prebuild --platform android --non-interactive
 
-      # Debug APKs expect Metro to serve index.android.bundle at runtime.
       # Release builds bundle JavaScript into the APK for standalone installs.
       - name: Build release APK
         working-directory: android
@@ -58,4 +64,5 @@ jobs:
       - name: Add APK to workflow summary
         run: |
           echo "## صبر إلكترونكس APK" >> "$GITHUB_STEP_SUMMARY"
-          echo "تم بناء ملف APK إصدار مستقل دون Metro. حمّله من Artifacts باسم sabr-electronics-release-apk." >> "$GITHUB_STEP_SUMMARY"
+          echo "تم بناء ملف APK إصدار مستقل دون Metro." >> "$GITHUB_STEP_SUMMARY"
+          echo "حمّله من Artifacts باسم sabr-electronics-release-apk." >> "$GITHUB_STEP_SUMMARY"
