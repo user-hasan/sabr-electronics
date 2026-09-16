@@ -40,11 +40,9 @@ npx eas build --platform ios
 
 ## تحميل التطبيق
 
-يمكن تحميل نسخة Android الجاهزة للتثبيت من الرابط التالي:
+يمكن تحميل نسخة Android الجاهزة للتثبيت من رابط الـ Artifact الأخير في تبويب **Actions**. اختر Artifact باسم `sabr-electronics-release-apk`، ثم فك ضغطه وثبّت ملف `app-release.apk`. هذه نسخة Release مستقلة ولا تحتاج إلى تشغيل Metro أو توصيل الهاتف بالكمبيوتر.
 
-[تحميل تطبيق صبر إلكترونكس](https://api.github.com/repos/user-hasan/sabr-electronics/actions/artifacts/10374126649/zip )
-
-بعد تنزيل الملف، فك ضغطه ثم ثبّت ملف APK على جهاز Android.
+لا تستخدم Artifact باسم `sabr-electronics-debug-apk`؛ فهو مخصص للتطوير ويحتاج إلى Metro.
 
 
 ## ملاحظات الخصوصية
