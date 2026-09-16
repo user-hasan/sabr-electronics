@@ -2,132 +2,25 @@ import { useMemo } from "react";
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { router } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppData } from "@/lib/app-store";
 import { DEVICE_STATUSES, formatDate, isOverdue, STATUS_COLORS } from "@/lib/app-types";
+import { useColors } from "@/hooks/use-colors";
 
 export default function HomeScreen() {
-  const { devices, isHydrated } = useAppData();
-  const activeDevices = devices.filter((device) => !device.isArchived);
-  const ready = activeDevices.filter((device) => device.status === "جاهز للتسليم");
-  const overdue = activeDevices.filter(isOverdue);
-  const revenue = activeDevices.reduce((sum, device) => sum + device.paidAmount, 0);
-  const recent = useMemo(() => activeDevices.slice(0, 4), [activeDevices]);
-
-  if (!isHydrated) return <ScreenContainer><View style={styles.loading}><ActivityIndicator color="#9A661D" size="large" /></View></ScreenContainer>;
-
-  return (
-    <ScreenContainer edges={["top", "left", "right"]}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.eyebrow}>إدارة المحل اليومية</Text>
-            <Text style={styles.title}>صبر إلكترونكس</Text>
-            <Text style={styles.subtitle}>كل جهاز في مكانه، وكل موعد تحت السيطرة.</Text>
-          </View>
-          <View style={styles.logo}><MaterialIcons name="memory" size={28} color="#FFF" /></View>
-        </View>
-
-        <View style={styles.heroCard}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.heroKicker}>ملخص العمل</Text>
-            <Text style={styles.heroTitle}>{activeDevices.length} جهاز قيد المتابعة</Text>
-            <Text style={styles.heroText}>{ready.length ? `${ready.length} جاهز للتسليم الآن` : "لا توجد أجهزة جاهزة للتسليم الآن"}</Text>
-          </View>
-          <View style={styles.heroIcon}><MaterialIcons name="inventory-2" size={30} color="#9A661D" /></View>
-        </View>
-
-        <View style={styles.quickRow}>
-          <Pressable onPress={() => router.push("/device/new" as any)} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
-            <MaterialIcons name="add" size={21} color="#FFF" /><Text style={styles.primaryText}>إضافة جهاز</Text>
-          </Pressable>
-          <Pressable onPress={() => router.push("/devices" as any)} style={({ pressed }) => [styles.outlineButton, pressed && styles.pressed]}>
-            <MaterialIcons name="search" size={20} color="#9A661D" /><Text style={styles.outlineText}>بحث سريع</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.statsGrid}>
-          <StatCard label="قيد المتابعة" value={activeDevices.filter((d) => d.status !== "تم التسليم" && d.status !== "ملغي").length} icon="build" color="#7C3AED" />
-          <StatCard label="جاهز للتسليم" value={ready.length} icon="check-circle" color="#2E8B70" />
-          <StatCard label="متأخر" value={overdue.length} icon="schedule" color="#C25B56" />
-          <StatCard label="المدفوع اليوم" value={`${revenue.toLocaleString()} د.ع`} icon="payments" color="#C98B32" />
-        </View>
-
-        <SectionHeader title="الحالات" action="عرض الكل" onPress={() => router.push("/devices" as any)} />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statusScroller}>
-          {DEVICE_STATUSES.map((status) => {
-            const count = activeDevices.filter((device) => device.status === status).length;
-            return <View key={status} style={styles.statusPill}><View style={[styles.dot, { backgroundColor: STATUS_COLORS[status] }]} /><Text style={styles.statusLabel}>{status}</Text><Text style={styles.statusCount}>{count}</Text></View>;
-          })}
-        </ScrollView>
-
-        <SectionHeader title="آخر الأجهزة" action="كل الأجهزة" onPress={() => router.push("/devices" as any)} />
-        {recent.length === 0 ? <EmptyState /> : recent.map((device) => (
-          <Pressable key={device.id} onPress={() => router.push((`/device/${device.id}`) as any)} style={({ pressed }) => [styles.deviceRow, pressed && styles.pressed]}>
-            <View style={styles.deviceBadge}><MaterialIcons name="phone-iphone" size={20} color="#9A661D" /></View>
-            <View style={styles.deviceInfo}><Text style={styles.deviceName}>{device.deviceModel || device.deviceType}</Text><Text style={styles.deviceMeta}>{device.customerName} • {device.orderNumber}</Text></View>
-            <View style={styles.deviceRight}><Text style={[styles.statusMini, { color: STATUS_COLORS[device.status] }]}>{device.status}</Text><Text style={styles.date}>{formatDate(device.receivedAt)}</Text></View>
-          </Pressable>
-        ))}
-      </ScrollView>
-    </ScreenContainer>
-  );
+  const colors = useColors(); const styles = makeStyles(colors); const { devices, isHydrated } = useAppData();
+  const active = devices.filter((d) => !d.isArchived); const ready = active.filter((d) => d.status === "جاهز للتسليم"); const overdue = active.filter(isOverdue); const recent = useMemo(() => active.slice(0, 4), [active]);
+  if (!isHydrated) return <ScreenContainer><View style={styles.loading}><ActivityIndicator color={colors.primary} size="large" /></View></ScreenContainer>;
+  return <ScreenContainer edges={["top", "left", "right"]}><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <View style={styles.header}><View><Text style={styles.eyebrow}>SABER ELECTRONICS</Text><Text style={styles.title}>لوحة التحكم</Text><Text style={styles.subtitle}>صيانة إلكترونيات متخصصة، بثقة.</Text></View><View style={styles.logo}><Text style={styles.logoText}>SE</Text></View></View>
+    <View style={styles.hero}><View style={{ flex: 1 }}><Text style={styles.heroKicker}>ملخص العمل</Text><Text style={styles.heroTitle}>{active.length} جهاز قيد المتابعة</Text><Text style={styles.heroText}>{ready.length ? `${ready.length} جاهز للتسليم الآن` : "لا توجد أجهزة جاهزة للتسليم الآن"}</Text></View><MaterialIcons name="precision-manufacturing" size={42} color={colors.primary} /></View>
+    <View style={styles.quickRow}><Action title="إضافة جهاز" icon="add" primary onPress={() => router.push("/device/new" as any)} /><Action title="بحث سريع" icon="search" onPress={() => router.push("/devices" as any)} /></View>
+    <View style={styles.statsGrid}><Stat label="قيد الإصلاح" value={active.filter((d) => d.status === "قيد الإصلاح").length} icon="build" color="#2563EB" styles={styles} /><Stat label="جاهز للتسليم" value={ready.length} icon="check-circle" color={colors.success} styles={styles} /><Stat label="متأخر" value={overdue.length} icon="schedule" color={colors.warning} styles={styles} /><Stat label="قيد الفحص" value={active.filter((d) => d.status === "قيد الفحص").length} icon="search" color="#7C3AED" styles={styles} /></View>
+    <Section title="فئات الأجهزة" action="عرض السجلات" onPress={() => router.push("/devices" as any)} styles={styles} /><View style={styles.categoryGrid}>{[["معدات طبية", "monitor-heart", "#3B82F6"], ["شاشات سيارات", "directions-car", colors.success], ["شاشات منزلية", "tv", "#7C3AED"], ["صوتيات ومضخمات", "speaker", colors.warning]].map(([label, icon, color]) => <View key={label} style={styles.category}><MaterialIcons name={icon as any} size={22} color={color} /><Text style={styles.categoryLabel}>{label}</Text><Text style={styles.categoryCount}>{active.filter((d) => d.deviceType === label).length} سجلات</Text></View>)}</View>
+    <Section title="آخر الأجهزة" action="كل الأجهزة" onPress={() => router.push("/devices" as any)} styles={styles} />{recent.length === 0 ? <View style={styles.empty}><MaterialIcons name="inbox" size={34} color={colors.muted} /><Text style={styles.emptyTitle}>لا توجد أجهزة بعد</Text><Text style={styles.emptyText}>ابدأ بإضافة أول جهاز للصيانة.</Text></View> : recent.map((d) => <Pressable key={d.id} onPress={() => router.push((`/device/${d.id}`) as any)} style={styles.deviceRow}><View style={styles.badge}><MaterialIcons name="memory" size={20} color={colors.primary} /></View><View style={styles.deviceInfo}><Text style={styles.deviceName}>{d.deviceModel || d.deviceType}</Text><Text style={styles.deviceMeta}>{d.customerName} • {d.orderNumber}</Text></View><View style={styles.deviceRight}><Text style={[styles.status, { color: STATUS_COLORS[d.status] }]}>{d.status}</Text><Text style={styles.date}>{formatDate(d.receivedAt)}</Text></View></Pressable>)}
+  </ScrollView></ScreenContainer>;
 }
-
-function StatCard({ label, value, icon, color }: { label: string; value: number | string; icon: keyof typeof MaterialIcons.glyphMap; color: string }) {
-  return <View style={styles.statCard}><View style={[styles.statIcon, { backgroundColor: `${color}18` }]}><MaterialIcons name={icon} size={19} color={color} /></View><Text style={styles.statValue}>{value}</Text><Text style={styles.statLabel}>{label}</Text></View>;
-}
-
-function SectionHeader({ title, action, onPress }: { title: string; action: string; onPress: () => void }) {
-  return <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>{title}</Text><Pressable onPress={onPress}><Text style={styles.sectionAction}>{action}</Text></Pressable></View>;
-}
-
-function EmptyState() {
-  return <View style={styles.empty}><MaterialIcons name="inbox" size={34} color="#C7BDAE" /><Text style={styles.emptyTitle}>لا توجد أجهزة بعد</Text><Text style={styles.emptyText}>ابدأ بإضافة أول جهاز لاستلامه وتتبع حالته.</Text></View>;
-}
-
-const styles = StyleSheet.create({
-  content: { padding: 20, paddingBottom: 34, gap: 16, direction: "rtl" },
-  loading: { flex: 1, alignItems: "center", justifyContent: "center" },
-  header: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
-  eyebrow: { color: "#9A661D", fontSize: 12, fontWeight: "700", marginBottom: 5, textAlign: "right" },
-  title: { color: "#1F2937", fontSize: 29, fontWeight: "900", textAlign: "right" },
-  subtitle: { color: "#7C7367", fontSize: 13, marginTop: 5, textAlign: "right" },
-  logo: { width: 54, height: 54, backgroundColor: "#9A661D", borderRadius: 18, alignItems: "center", justifyContent: "center" },
-  heroCard: { backgroundColor: "#F1E7D4", borderRadius: 24, padding: 19, flexDirection: "row-reverse", alignItems: "center", gap: 15 },
-  heroKicker: { color: "#9A661D", fontWeight: "800", fontSize: 12, textAlign: "right" },
-  heroTitle: { color: "#3C2C17", fontSize: 20, fontWeight: "900", marginTop: 6, textAlign: "right" },
-  heroText: { color: "#7B6546", fontSize: 13, marginTop: 5, textAlign: "right" },
-  heroIcon: { width: 58, height: 58, borderRadius: 18, backgroundColor: "#FFF8EC", alignItems: "center", justifyContent: "center" },
-  quickRow: { flexDirection: "row-reverse", gap: 10 },
-  primaryButton: { backgroundColor: "#9A661D", borderRadius: 14, paddingVertical: 14, flex: 1, flexDirection: "row-reverse", justifyContent: "center", alignItems: "center", gap: 7 },
-  outlineButton: { backgroundColor: "#FFF", borderWidth: 1, borderColor: "#D9CDBD", borderRadius: 14, paddingVertical: 14, flex: 1, flexDirection: "row-reverse", justifyContent: "center", alignItems: "center", gap: 7 },
-  primaryText: { color: "#FFF", fontSize: 14, fontWeight: "800" },
-  outlineText: { color: "#9A661D", fontSize: 14, fontWeight: "800" },
-  pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
-  statsGrid: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 10 },
-  statCard: { width: "48.5%", minHeight: 108, backgroundColor: "#FFF", borderWidth: 1, borderColor: "#EEE7DC", borderRadius: 18, padding: 13, alignItems: "flex-end" },
-  statIcon: { width: 32, height: 32, borderRadius: 11, alignItems: "center", justifyContent: "center", marginBottom: 8 },
-  statValue: { color: "#1F2937", fontSize: 20, fontWeight: "900" },
-  statLabel: { color: "#80776B", fontSize: 12, marginTop: 3 },
-  sectionHeader: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", marginTop: 4 },
-  sectionTitle: { color: "#1F2937", fontSize: 17, fontWeight: "900" },
-  sectionAction: { color: "#9A661D", fontSize: 12, fontWeight: "800" },
-  statusScroller: { gap: 8, flexDirection: "row-reverse" },
-  statusPill: { backgroundColor: "#FFF", borderWidth: 1, borderColor: "#EEE7DC", borderRadius: 14, paddingHorizontal: 11, paddingVertical: 10, flexDirection: "row-reverse", alignItems: "center", gap: 5 },
-  dot: { width: 7, height: 7, borderRadius: 4 },
-  statusLabel: { color: "#6B7280", fontSize: 11 },
-  statusCount: { color: "#1F2937", fontSize: 12, fontWeight: "900" },
-  deviceRow: { backgroundColor: "#FFF", borderWidth: 1, borderColor: "#EEE7DC", borderRadius: 17, padding: 12, flexDirection: "row-reverse", alignItems: "center", gap: 10 },
-  deviceBadge: { width: 40, height: 40, borderRadius: 13, backgroundColor: "#F6EEDC", alignItems: "center", justifyContent: "center" },
-  deviceInfo: { flex: 1, alignItems: "flex-end" },
-  deviceName: { color: "#1F2937", fontWeight: "800", fontSize: 14 },
-  deviceMeta: { color: "#8A8174", fontSize: 11, marginTop: 4 },
-  deviceRight: { alignItems: "flex-start", minWidth: 90 },
-  statusMini: { fontSize: 10, fontWeight: "900" },
-  date: { color: "#9A9287", fontSize: 10, marginTop: 5 },
-  empty: { backgroundColor: "#FFF", borderRadius: 18, padding: 24, alignItems: "center", borderWidth: 1, borderColor: "#EEE7DC" },
-  emptyTitle: { color: "#4B5563", fontWeight: "800", fontSize: 15, marginTop: 10 },
-  emptyText: { color: "#9A9287", fontSize: 12, marginTop: 4, textAlign: "center" },
-});
+function Action({ title, icon, primary, onPress }: { title: string; icon: keyof typeof MaterialIcons.glyphMap; primary?: boolean; onPress: () => void }) { return <Pressable onPress={onPress} style={({ pressed }) => [{ flex: 1, backgroundColor: primary ? "#0E2238" : "transparent", borderColor: "#0E2238", borderWidth: primary ? 0 : 1, borderRadius: 14, paddingVertical: 14, flexDirection: "row-reverse", justifyContent: "center", alignItems: "center", gap: 7 }, pressed && { opacity: 0.75 }]}><MaterialIcons name={icon} size={20} color={primary ? "#FFF" : "#0E2238"} /><Text style={{ color: primary ? "#FFF" : "#0E2238", fontWeight: "800", fontSize: 14 }}>{title}</Text></Pressable>; }
+function Stat({ label, value, icon, color, styles }: any) { return <View style={styles.stat}><View style={[styles.statIcon, { backgroundColor: `${color}22` }]}><MaterialIcons name={icon} size={19} color={color} /></View><Text style={styles.statValue}>{value}</Text><Text style={styles.statLabel}>{label}</Text></View>; }
+function Section({ title, action, onPress, styles }: any) { return <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>{title}</Text><Pressable onPress={onPress}><Text style={styles.sectionAction}>{action}</Text></Pressable></View>; }
+function makeStyles(c: ReturnType<typeof useColors>) { return StyleSheet.create({ content: { padding: 20, paddingBottom: 34, gap: 16, direction: "rtl" }, loading: { flex: 1, alignItems: "center", justifyContent: "center" }, header: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center" }, eyebrow: { color: c.primary, fontSize: 11, fontWeight: "900", textAlign: "right", letterSpacing: 1 }, title: { color: c.foreground, fontSize: 29, fontWeight: "900", textAlign: "right", marginTop: 4 }, subtitle: { color: c.muted, fontSize: 13, marginTop: 5, textAlign: "right" }, logo: { width: 56, height: 56, borderRadius: 18, backgroundColor: c.primary, alignItems: "center", justifyContent: "center" }, logoText: { color: "#FFF", fontSize: 18, fontWeight: "900" }, hero: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, borderRadius: 22, padding: 19, flexDirection: "row-reverse", alignItems: "center", gap: 15 }, heroKicker: { color: c.primary, fontWeight: "800", fontSize: 12, textAlign: "right" }, heroTitle: { color: c.foreground, fontSize: 20, fontWeight: "900", marginTop: 6, textAlign: "right" }, heroText: { color: c.muted, fontSize: 13, marginTop: 5, textAlign: "right" }, quickRow: { flexDirection: "row-reverse", gap: 10 }, statsGrid: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 10 }, stat: { width: "48.5%", minHeight: 105, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, borderRadius: 17, padding: 13, alignItems: "flex-end" }, statIcon: { width: 32, height: 32, borderRadius: 11, alignItems: "center", justifyContent: "center", marginBottom: 8 }, statValue: { color: c.foreground, fontSize: 20, fontWeight: "900" }, statLabel: { color: c.muted, fontSize: 12, marginTop: 3 }, sectionHeader: { flexDirection: "row-reverse", justifyContent: "space-between", alignItems: "center", marginTop: 4 }, sectionTitle: { color: c.foreground, fontSize: 17, fontWeight: "900" }, sectionAction: { color: c.primary, fontSize: 12, fontWeight: "800" }, categoryGrid: { flexDirection: "row-reverse", flexWrap: "wrap", gap: 10 }, category: { width: "48.5%", backgroundColor: c.surface, borderColor: c.border, borderWidth: 1, borderRadius: 16, padding: 13, alignItems: "flex-end" }, categoryLabel: { color: c.foreground, fontWeight: "800", fontSize: 12, marginTop: 8 }, categoryCount: { color: c.muted, fontSize: 10, marginTop: 4 }, deviceRow: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.border, borderRadius: 17, padding: 12, flexDirection: "row-reverse", alignItems: "center", gap: 10 }, badge: { width: 40, height: 40, borderRadius: 13, backgroundColor: c.border, alignItems: "center", justifyContent: "center" }, deviceInfo: { flex: 1, alignItems: "flex-end" }, deviceName: { color: c.foreground, fontWeight: "800", fontSize: 14 }, deviceMeta: { color: c.muted, fontSize: 11, marginTop: 4 }, deviceRight: { alignItems: "flex-start", minWidth: 90 }, status: { fontSize: 10, fontWeight: "900" }, date: { color: c.muted, fontSize: 10, marginTop: 5 }, empty: { backgroundColor: c.surface, borderRadius: 18, padding: 24, alignItems: "center", borderWidth: 1, borderColor: c.border }, emptyTitle: { color: c.foreground, fontWeight: "800", fontSize: 15, marginTop: 10 }, emptyText: { color: c.muted, fontSize: 12, marginTop: 4, textAlign: "center" } }); }

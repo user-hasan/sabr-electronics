@@ -107,7 +107,7 @@ export function uid() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export const DEVICE_TYPES = ["هاتف", "حاسوب", "جهاز ألعاب", "شاشة", "جهاز لوحي", "أخرى"];
+export const DEVICE_TYPES = ["معدات طبية", "شاشات سيارات", "شاشات منزلية", "صوتيات", "مضخمات", "أخرى"];
 
 export function matchesDevice(device: DeviceRecord, query: string) {
   const normalized = query.trim().toLocaleLowerCase("ar");
