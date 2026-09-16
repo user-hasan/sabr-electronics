@@ -6,7 +6,7 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   NODE_VERSION: 22
@@ -61,8 +61,22 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Publish APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: صبر إلكترونكس v${{ github.run_number }}
+          body: |
+            إصدار Android APK جاهز للتثبيت.
+            تم إنشاء هذا الإصدار تلقائيًا بواسطة GitHub Actions.
+          files: android/app/build/outputs/apk/release/app-release.apk
+          generate_release_notes: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Add APK to workflow summary
         run: |
           echo "## صبر إلكترونكس APK" >> "$GITHUB_STEP_SUMMARY"
           echo "تم بناء ملف APK إصدار مستقل دون Metro." >> "$GITHUB_STEP_SUMMARY"
-          echo "حمّله من Artifacts باسم sabr-electronics-release-apk." >> "$GITHUB_STEP_SUMMARY"
+          echo "تم نشره أيضًا في GitHub Releases." >> "$GITHUB_STEP_SUMMARY"
