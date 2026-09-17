@@ -5,6 +5,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 import { AppLock } from "@/components/app-lock";
+import { AppUpdateNotice } from "@/components/app-update-notice";
 import { BrandSplash } from "@/components/brand-splash";
 import { AppDataProvider } from "@/lib/app-store";
 import { ThemeProvider, useThemeContext } from "@/lib/theme-provider";
@@ -27,6 +28,7 @@ function RootContent({ showBrandSplash, finishSplash }: { showBrandSplash: boole
     <>
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <AppLock />
+      <AppUpdateNotice />
       <Stack screenOptions={{ headerShown: false, animation: "fade", contentStyle: { backgroundColor: "transparent" } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="device/new" options={{ presentation: "modal" }} />

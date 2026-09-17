@@ -12,7 +12,7 @@ export default function TabLayout() {
   const bottomPadding = Platform.OS === "web" ? 10 : Math.max(insets.bottom, 8);
   return <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.primary, tabBarInactiveTintColor: colors.muted, tabBarButton: HapticTab, tabBarStyle: { paddingTop: 7, paddingBottom: bottomPadding, height: 57 + bottomPadding, backgroundColor: colors.background, borderTopColor: colors.border, borderTopWidth: 0.5 } }}>
     <Tabs.Screen name="index" options={{ title: "الرئيسية", tabBarIcon: ({ color, size }) => <MaterialIcons name="dashboard" color={color} size={size} /> }} />
-    <Tabs.Screen name="devices" options={{ title: "الأجهزة", tabBarIcon: ({ color, size }) => <MaterialIcons name="phone-iphone" color={color} size={size} /> }} />
+    <Tabs.Screen name="devices" options={{ title: "الأجهزة", tabBarIcon: ({ color, size }) => <MaterialIcons name="precision-manufacturing" color={color} size={size} /> }} />
     <Tabs.Screen name="reports" options={{ title: "التقارير", tabBarIcon: ({ color, size }) => <MaterialIcons name="bar-chart" color={color} size={size} /> }} />
     <Tabs.Screen name="settings" options={{ title: "الإعدادات", tabBarIcon: ({ color, size }) => <MaterialIcons name="settings" color={color} size={size} /> }} />
   </Tabs>;

@@ -129,7 +129,7 @@ export function createEmptyDevice(devices: DeviceRecord[]): DeviceRecord {
     orderNumber: makeOrderNumber(devices),
     customerName: "",
     customerPhone: "",
-    deviceType: "هاتف",
+    deviceType: "أخرى",
     deviceModel: "",
     status: "تم الاستلام",
     inspectionFee: 0,
@@ -204,4 +204,8 @@ export function devicesToReportHtml(devices: DeviceRecord[], currency: string) {
 
 export function customerWhatsappMessage(device: DeviceRecord) {
   return `صبر إلكترونكس\nمرحبًا ${device.customerName}، جهازك ${device.deviceModel || device.deviceType} أصبح جاهزًا للتسليم. رقم الطلب: ${device.orderNumber}. ننتظركم في المحل.`;
+}
+
+export function customerWhatsappOverdueMessage(device: DeviceRecord) {
+  return `صبر إلكترونكس\nمرحبًا ${device.customerName}، نود إبلاغكم بأن جهازكم ${device.deviceModel || device.deviceType} تجاوز موعد التسليم المتوقع. رقم الطلب: ${device.orderNumber}. سنتواصل معكم عند اكتمال العمل.`;
 }

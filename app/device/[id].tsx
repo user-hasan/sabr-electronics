@@ -5,7 +5,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useAppData } from "@/lib/app-store";
-import { customerWhatsappMessage, DEVICE_STATUSES, formatDate, isOverdue, remainingAmount, STATUS_COLORS, type DeviceRecord, type DeviceStatus } from "@/lib/app-types";
+import { customerWhatsappMessage, customerWhatsappOverdueMessage, DEVICE_STATUSES, formatDate, isOverdue, remainingAmount, STATUS_COLORS, type DeviceRecord, type DeviceStatus } from "@/lib/app-types";
 
 export default function DeviceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -15,7 +15,7 @@ export default function DeviceDetailScreen() {
   const overdue = isOverdue(device);
   const update = async (status: DeviceStatus) => { await updateStatus(device.id, status); };
   const archive = () => Alert.alert("أرشفة السجل", "سيبقى السجل محفوظًا في الأرشيف ولن يظهر ضمن الأجهزة النشطة.", [{ text: "إلغاء", style: "cancel" }, { text: "أرشفة", style: "destructive", onPress: () => { void archiveDevice(device.id); router.back(); } }]);
-  const whatsapp = async () => { if (!device.customerPhone) { Alert.alert("رقم غير موجود", "أضف رقم هاتف الزبون أولًا."); return; } const phone = device.customerPhone.replace(/[^0-9+]/g, ""); await Linking.openURL(`whatsapp://send?phone=${phone}&text=${encodeURIComponent(customerWhatsappMessage(device))}`); };
+  const whatsapp = async () => { if (!device.customerPhone) { Alert.alert("رقم غير موجود", "أضف رقم هاتف الزبون أولًا."); return; } const phone = device.customerPhone.replace(/[^0-9+]/g, ""); const message = overdue ? customerWhatsappOverdueMessage(device) : customerWhatsappMessage(device); await Linking.openURL(`whatsapp://send?phone=${phone}&text=${encodeURIComponent(message)}`); };
   const share = async () => { await Share.share({ message: `${device.orderNumber}\n${device.customerName}\n${device.deviceModel}\nالحالة: ${device.status}\nالمتبقي: ${remainingAmount(device).toLocaleString()} د.ع` }); };
   return <ScreenContainer><ScrollView contentContainerStyle={styles.content}><View style={styles.header}><Pressable onPress={() => router.back()} style={styles.back}><MaterialIcons name="arrow-forward" size={22} color="#5F574D" /></Pressable><View style={styles.headerText}><Text style={styles.eyebrow}>{device.orderNumber}</Text><Text style={styles.title}>{device.deviceModel || device.deviceType}</Text><Text style={styles.subtitle}>{device.customerName} • {device.customerPhone || "بدون رقم"}</Text></View></View>
     <View style={styles.statusBanner}><View><Text style={styles.bannerLabel}>الحالة الحالية</Text><Text style={[styles.bannerStatus, { color: STATUS_COLORS[device.status] }]}>{device.status}</Text>{overdue && <Text style={styles.overdue}>هذا الجهاز متأخر عن موعد التسليم</Text>}</View><View style={[styles.statusCircle, { backgroundColor: `${STATUS_COLORS[device.status]}20` }]}><MaterialIcons name={device.status === "جاهز للتسليم" ? "check-circle" : "build"} size={28} color={STATUS_COLORS[device.status]} /></View></View>

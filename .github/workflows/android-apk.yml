@@ -2,8 +2,8 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    branches: [main]
 
 permissions:
   contents: write
@@ -11,7 +11,6 @@ permissions:
 env:
   NODE_VERSION: 22
 
-# Prevent duplicate APK builds from running at the same time.
 concurrency:
   group: android-apk-build
   cancel-in-progress: true
@@ -21,38 +20,27 @@ jobs:
     name: Build installable Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.release.tag_name || github.ref }}
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9.12.0
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-
       - name: Verify Java
         run: java -version
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Generate native Android project
         run: pnpm exec expo prebuild --platform android --non-interactive
-
-      # Release builds bundle JavaScript into the APK for standalone installs.
       - name: Build release APK
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon --stacktrace
-
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -60,23 +48,19 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 30
-
-      - name: Publish APK to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ github.run_number }}
-          name: صبر إلكترونكس v${{ github.run_number }}
-          body: |
-            إصدار Android APK جاهز للتثبيت.
-            تم إنشاء هذا الإصدار تلقائيًا بواسطة GitHub Actions.
-          files: android/app/build/outputs/apk/release/app-release.apk
-          generate_release_notes: true
-          make_latest: true
+      - name: Publish public GitHub Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -o 'version: "[^"]*"' app.config.ts | head -1 | cut -d'"' -f2)
+          TAG="v${VERSION}"
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes 2>/dev/null || true
+          gh release create "$TAG" android/app/build/outputs/apk/release/app-release.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Saber Electronics ${TAG}" \
+            --notes "نسخة عامة مستقلة من Saber Electronics.\n\n- إصلاح الثيم والتباين والاستجابة للشاشات المختلفة.\n- الحفاظ على WhatsApp والنسخ الاحتياطي والحماية.\n- إضافة فحص التحديثات من داخل التطبيق.\n- Android 9 وما بعده." \
+            --latest
       - name: Add APK to workflow summary
         run: |
-          echo "## صبر إلكترونكس APK" >> "$GITHUB_STEP_SUMMARY"
-          echo "تم بناء ملف APK إصدار مستقل دون Metro." >> "$GITHUB_STEP_SUMMARY"
-          echo "تم نشره أيضًا في GitHub Releases." >> "$GITHUB_STEP_SUMMARY"
+          echo "## Saber Electronics APK" >> "$GITHUB_STEP_SUMMARY"
+          echo "تم نشر APK في GitHub Releases العامة." >> "$GITHUB_STEP_SUMMARY"
