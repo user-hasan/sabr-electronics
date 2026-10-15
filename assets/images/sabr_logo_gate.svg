@@ -1,0 +1,305 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+  <defs>
+    <!-- Background & Medallion Gradients -->
+    <radialGradient id="spaceDark" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="45%" stop-color="#0F172A"/>
+      <stop offset="85%" stop-color="#050B14"/>
+      <stop offset="100%" stop-color="#020408"/>
+    </radialGradient>
+
+    <!-- Outer Rim Metallic Gold & Platinum -->
+    <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFBEB"/>
+      <stop offset="20%" stop-color="#FCD34D"/>
+      <stop offset="45%" stop-color="#D97706"/>
+      <stop offset="60%" stop-color="#F59E0B"/>
+      <stop offset="80%" stop-color="#92400E"/>
+      <stop offset="95%" stop-color="#FDE68A"/>
+      <stop offset="100%" stop-color="#B45309"/>
+    </linearGradient>
+
+    <!-- Cyber Neon Cyan Gradient -->
+    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0F2FE"/>
+      <stop offset="25%" stop-color="#38BDF8"/>
+      <stop offset="60%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+
+    <!-- 3D Bevel Gradient for Gate Structure -->
+    <linearGradient id="gateBevel3D" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#67E8F9"/>
+      <stop offset="25%" stop-color="#0284C7"/>
+      <stop offset="60%" stop-color="#0F172A"/>
+      <stop offset="90%" stop-color="#0369A1"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+
+    <!-- 3D Gold Gradient for Monogram E -->
+    <linearGradient id="monogramGold" x1="0%" y1="0%" x2="100%" y2="90%">
+      <stop offset="0%" stop-color="#FEF08A"/>
+      <stop offset="25%" stop-color="#F59E0B"/>
+      <stop offset="55%" stop-color="#B45309"/>
+      <stop offset="75%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#78350F"/>
+    </linearGradient>
+
+    <!-- 3D Cyan/Diamond Gradient for Monogram S -->
+    <linearGradient id="monogramCyan" x1="0%" y1="0%" x2="100%" y2="90%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="20%" stop-color="#67E8F9"/>
+      <stop offset="55%" stop-color="#00E5FF"/>
+      <stop offset="80%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#082F49"/>
+    </linearGradient>
+
+    <!-- Chrome Highlight -->
+    <linearGradient id="chromeHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.6"/>
+      <stop offset="50%" stop-color="#FFFFFF" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Filters: Deep Realistic Drop Shadows & Neon Glow -->
+    <filter id="heavyShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.9"/>
+    </filter>
+
+    <filter id="monogramShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="2" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.85"/>
+    </filter>
+
+    <filter id="neonAura" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="subtleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- ================= 1. THE LUXURY CIRCULAR BASE ================= -->
+  <!-- Outer Dark Shadow Ring -->
+  <circle cx="400" cy="400" r="375" fill="none" stroke="#000000" stroke-width="12" opacity="0.6" filter="url(#heavyShadow)"/>
+
+  <!-- Main Medallion Body -->
+  <circle cx="400" cy="400" r="370" fill="url(#spaceDark)" stroke="#1E293B" stroke-width="4"/>
+
+  <!-- Precision Multi-Layered Metallic Outer Rings -->
+  <circle cx="400" cy="400" r="366" fill="none" stroke="url(#goldRim)" stroke-width="6"/>
+  <circle cx="400" cy="400" r="356" fill="none" stroke="#00E5FF" stroke-width="1.5" stroke-opacity="0.5"/>
+  <circle cx="400" cy="400" r="350" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-opacity="0.4" stroke-dasharray="6 8"/>
+
+  <!-- Precision Dial Calibration Marks (Like Luxury Watches & Scientific Instruments) -->
+  <g stroke="#38BDF8" stroke-width="2" stroke-linecap="round" opacity="0.45">
+    <line x1="400" y1="46" x2="400" y2="58"/>
+    <line x1="400" y1="742" x2="400" y2="754"/>
+    <line x1="46" y1="400" x2="58" y2="400"/>
+    <line x1="742" y1="400" x2="754" y2="400"/>
+    <line x1="150" y1="150" x2="160" y2="160"/>
+    <line x1="650" y1="150" x2="640" y2="160"/>
+    <line x1="150" y1="650" x2="160" y2="640"/>
+    <line x1="650" y1="650" x2="640" y2="640"/>
+  </g>
+
+  <!-- Glowing Circuit Tracks in Background -->
+  <g opacity="0.3" filter="url(#subtleGlow)">
+    <path d="M 120 400 L 170 400 L 195 360 L 220 360" fill="none" stroke="#00E5FF" stroke-width="2"/>
+    <circle cx="120" cy="400" r="4" fill="#00E5FF"/>
+    <path d="M 680 400 L 630 400 L 605 440 L 580 440" fill="none" stroke="#F59E0B" stroke-width="2"/>
+    <circle cx="680" cy="400" r="4" fill="#F59E0B"/>
+  </g>
+
+  <!-- ================= 2. THE ELECTRONIC XOR LOGIC GATE ================= -->
+  <g filter="url(#heavyShadow)">
+    <!-- Circuit Input Traces (Left Side) -->
+    <path d="M 110 310 L 190 310" stroke="url(#neonCyan)" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="110" cy="310" r="9" fill="#00E5FF" stroke="#FFFFFF" stroke-width="2.5" filter="url(#neonAura)"/>
+    <circle cx="110" cy="310" r="4" fill="#FFFFFF"/>
+
+    <path d="M 110 490 L 190 490" stroke="url(#neonCyan)" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="110" cy="490" r="9" fill="#00E5FF" stroke="#FFFFFF" stroke-width="2.5" filter="url(#neonAura)"/>
+    <circle cx="110" cy="490" r="4" fill="#FFFFFF"/>
+
+    <!-- XOR Input Curve 1: The Outer Curved Arc -->
+    <path d="M 175 240 Q 255 400 175 560" 
+          fill="none" 
+          stroke="url(#neonCyan)" 
+          stroke-width="14" 
+          stroke-linecap="round"
+          filter="url(#neonAura)"/>
+    <!-- Outer Arc Core Highlight -->
+    <path d="M 175 240 Q 255 400 175 560" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="3" 
+          stroke-linecap="round"
+          opacity="0.8"/>
+
+    <!-- Main Logic Gate Body (Chassis) -->
+    <!-- Inner Input Arc: from (215, 240) to (215, 560) -->
+    <!-- Converging Top & Bottom Shells meeting at Output point (605, 400) -->
+    <path d="M 215 240 
+             Q 295 400 215 560 
+             C 365 560, 525 500, 605 400 
+             C 525 300, 365 240, 215 240 Z" 
+          fill="#0B132B" 
+          fill-opacity="0.88" 
+          stroke="url(#gateBevel3D)" 
+          stroke-width="12" 
+          stroke-linejoin="round"/>
+
+    <!-- Internal Gate Metallic Bevel Shading -->
+    <path d="M 223 248 
+             Q 300 400 223 552 
+             C 368 552, 520 496, 595 400 
+             C 520 304, 368 248, 223 248 Z" 
+          fill="none" 
+          stroke="url(#chromeHighlight)" 
+          stroke-width="3"/>
+
+    <!-- Circuit Output Trace (Right Side) -->
+    <path d="M 605 400 L 690 400" stroke="url(#goldRim)" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="690" cy="400" r="11" fill="#F59E0B" stroke="#FFFBEB" stroke-width="3" filter="url(#neonAura)"/>
+    <circle cx="690" cy="400" r="5" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ================= 3. THE INTERTWINED MONOGRAM (S & E) ================= -->
+  <!-- Designed with mathematical precision to form an intertwining luxury monogram inside the gate -->
+  <g filter="url(#monogramShadow)" transform="translate(40, 0)">
+    
+    <!-- === LETTER E (Base Structure in Brushed 24K Gold) === -->
+    <g id="letter_E_assembly">
+      <!-- E Vertical Backbone -->
+      <path d="M 330 290 
+               L 358 290 
+               C 362 290, 365 293, 365 297
+               L 365 503 
+               C 365 507, 362 510, 358 510 
+               L 330 510 
+               C 326 510, 323 507, 323 503 
+               L 323 297 
+               C 323 293, 326 290, 330 290 Z" 
+            fill="url(#monogramGold)"/>
+      <path d="M 325 292 L 325 508" stroke="#FFE082" stroke-width="2" opacity="0.7"/>
+
+      <!-- E Top Arm -->
+      <path d="M 365 290 
+               L 455 290 
+               C 462 290, 467 295, 467 302 
+               L 467 318 
+               C 467 325, 462 330, 455 330 
+               L 365 330 Z" 
+            fill="url(#monogramGold)"/>
+      <line x1="365" y1="292" x2="455" y2="292" stroke="#FFF" stroke-width="1.5" opacity="0.8"/>
+
+      <!-- E Bottom Arm -->
+      <path d="M 365 470 
+               L 455 470 
+               C 462 470, 467 475, 467 482 
+               L 467 498 
+               C 467 505, 462 510, 455 510 
+               L 365 510 Z" 
+            fill="url(#monogramGold)"/>
+      <line x1="365" y1="508" x2="455" y2="508" stroke="#B45309" stroke-width="2" opacity="0.9"/>
+    </g>
+
+    <!-- === LETTER S (Fluid 3D Cyber Cyan Ribbon Intertwining through E) === -->
+    <!-- S is woven: S Top Loop goes OVER E's Top Arm -> Down through the spine -> UNDER E's Middle Arm -> OVER E's Bottom Arm -->
+    <g id="letter_S_assembly">
+      <!-- Complete Master Smooth Curve of S -->
+      <path d="M 445 315 
+               C 445 280, 420 262, 375 262 
+               C 320 262, 280 295, 280 340 
+               C 280 395, 330 405, 360 415 
+               C 405 430, 425 445, 425 472 
+               C 425 510, 385 538, 335 538 
+               C 290 538, 260 515, 260 480" 
+            fill="none" 
+            stroke="url(#monogramCyan)" 
+            stroke-width="38" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"/>
+
+      <!-- S High-Gloss Core Neon Ridge -->
+      <path d="M 445 315 
+               C 445 280, 420 262, 375 262 
+               C 320 262, 280 295, 280 340 
+               C 280 395, 330 405, 360 415 
+               C 405 430, 425 445, 425 472 
+               C 425 510, 385 538, 335 538 
+               C 290 538, 260 515, 260 480" 
+            fill="none" 
+            stroke="#FFFFFF" 
+            stroke-width="6" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"
+            opacity="0.85"
+            filter="url(#subtleGlow)"/>
+
+      <!-- === INTERLOCKING 3D WOVEN OVERLAPS === -->
+      <!-- 1. Interlock Overlap: E's Middle Arm crosses OVER the spine of S -->
+      <!-- Drop shadow cast by E's middle arm onto S -->
+      <rect x="345" y="380" width="85" height="42" rx="6" fill="#000000" opacity="0.5" filter="url(#subtleGlow)"/>
+      <!-- E Middle Arm -->
+      <path d="M 335 385 
+               L 425 385 
+               C 432 385, 437 390, 437 397 
+               L 437 407 
+               C 437 414, 432 419, 425 419 
+               L 335 419 Z" 
+            fill="url(#monogramGold)"/>
+      <line x1="335" y1="387" x2="425" y2="387" stroke="#FFF" stroke-width="1.5" opacity="0.8"/>
+
+      <!-- 2. Interlock Overlap: Center crossing of S weaving OVER E's vertical backbone -->
+      <!-- S passes boldly over E's vertical backbone at (345, 345) -->
+      <path d="M 315 365 C 335 380, 360 395, 380 405" 
+            fill="none" 
+            stroke="url(#monogramCyan)" 
+            stroke-width="38" 
+            stroke-linecap="round"/>
+      <path d="M 315 365 C 335 380, 360 395, 380 405" 
+            fill="none" 
+            stroke="#FFFFFF" 
+            stroke-width="6" 
+            stroke-linecap="round" 
+            opacity="0.85"/>
+    </g>
+
+    <!-- Diamond Light Sparkles on Monogram Peaks -->
+    <circle cx="445" cy="315" r="5" fill="#FFFFFF" filter="url(#neonAura)"/>
+    <circle cx="260" cy="480" r="5" fill="#FFFFFF" filter="url(#neonAura)"/>
+    <circle cx="460" cy="305" r="4" fill="#FFE082" filter="url(#neonAura)"/>
+    <circle cx="460" cy="495" r="4" fill="#FFE082" filter="url(#neonAura)"/>
+  </g>
+
+  <!-- ================= 4. TYPOGRAPHY & BRAND CURVED BANNERS ================= -->
+  <!-- Top Curved Path for English Brand Name -->
+  <path id="curveEnglish" d="M 115 220 A 310 310 0 0 1 685 220" fill="none"/>
+  <text fill="url(#neonCyan)" font-family="'Orbitron', 'Montserrat', 'Segoe UI', sans-serif" font-size="28" font-weight="900" letter-spacing="7" filter="url(#subtleGlow)">
+    <textPath href="#curveEnglish" startOffset="50%" text-anchor="middle">
+      SABR ELECTRONICS
+    </textPath>
+  </text>
+
+  <!-- Bottom Curved Path for Arabic Brand Name -->
+  <path id="curveArabic" d="M 685 580 A 310 310 0 0 1 115 580" fill="none"/>
+  <text fill="url(#goldRim)" font-family="'Readex Pro', 'Cairo', 'Segoe UI', sans-serif" font-size="34" font-weight="900" letter-spacing="3" filter="url(#subtleGlow)">
+    <textPath href="#curveArabic" startOffset="50%" text-anchor="middle">
+      صبر إلكترونكس
+    </textPath>
+  </text>
+
+  <!-- Center Lateral Decorative Microchips & Separators -->
+  <g fill="#00E5FF" filter="url(#neonAura)">
+    <circle cx="95" cy="400" r="5"/>
+    <polygon points="90,400 95,392 100,400 95,408"/>
+  </g>
+  <g fill="#F59E0B" filter="url(#neonAura)">
+    <circle cx="705" cy="400" r="5"/>
+    <polygon points="700,400 705,392 710,400 705,408"/>
+  </g>
+</svg>
