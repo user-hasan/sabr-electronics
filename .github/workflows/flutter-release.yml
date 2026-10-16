@@ -1,0 +1,68 @@
+name: Build and Release Flutter APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: flutter-apk-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Publish Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Run Tests
+        run: flutter test
+
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sabr-electronics-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v1.1.0"
+          gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes 2>/dev/null || true
+          gh release create "$TAG" build/app/outputs/flutter-apk/app-release.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Saber Electronics v1.1.0 (Flutter + Offline SQLite)" \
+            --notes "تحديث شامل لنظام صبر إلكترونكس وفق أحدث معايير Flutter وClean Architecture.\n\n### أهم الميزات:\n- محرك مالي منضبط لإدارة التكاليف والخصومات والديون.\n- نظام إعدادات مركزي بـ 6 أقسام وتحكم كامل بالمظهر (Midnight Indigo / Pearl Light).\n- خدمة النسخ الاحتياطي والاستعادة مع آلية التراجع التلقائي وفحص سلامة الترويسة.\n- سجل وإدارة العملاء مع إحصائيات المديونية والأجهزة المسجلة.\n- سجل الرقابة والتدقيق (Audit Log) للعمليات الحساسة.\n- طباعة حرارية 58mm و 80mm وإدارة المخزون متعدد العملات (YER, SAR, USD)." \
+            --latest
+
+      - name: Summary
+        run: |
+          echo "## Saber Electronics v1.1.0 APK" >> "$GITHUB_STEP_SUMMARY"
+          echo "تم بناء وتحديث APK بنجاح ونشره في GitHub Releases." >> "$GITHUB_STEP_SUMMARY"
