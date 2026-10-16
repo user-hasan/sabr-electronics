@@ -13,6 +13,8 @@ import '../../../../domain/enums/payment_method.dart';
 import '../../../../domain/enums/repair_status.dart';
 import '../../../../services/image_service.dart';
 import '../../../../services/printing_service.dart';
+import '../../../../data/repositories/auth_repository_impl.dart';
+import '../../../../domain/entities/user_entity.dart';
 import '../../customers/screens/customer_form_dialog.dart';
 
 class IntakeWizardScreen extends StatefulWidget {
@@ -24,9 +26,11 @@ class IntakeWizardScreen extends StatefulWidget {
 
 class _IntakeWizardScreenState extends State<IntakeWizardScreen> {
   final CustomerRepositoryImpl _customerRepo = CustomerRepositoryImpl();
+  final AuthRepositoryImpl _authRepo = AuthRepositoryImpl();
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final ImageService _imageService = ImageService();
   final ImagePicker _picker = ImagePicker();
+  UserEntity? _currentUser;
 
   int _currentStep = 0;
   bool _isSaving = false;
@@ -100,7 +104,13 @@ class _IntakeWizardScreenState extends State<IntakeWizardScreen> {
 
   Future<void> _loadRecentCustomers() async {
     final list = await _customerRepo.getAllCustomers(limit: 5);
-    if (mounted) setState(() => _searchedCustomers = list);
+    final user = await _authRepo.getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _searchedCustomers = list;
+        _currentUser = user;
+      });
+    }
   }
 
   Future<void> _onSearchCustomer(String query) async {
@@ -212,7 +222,7 @@ class _IntakeWizardScreenState extends State<IntakeWizardScreen> {
             'amount': advancePaid,
             'currency': _selectedCurrency.code,
             'paymentMethod': _selectedPaymentMethod.code,
-            'receivedByUserId': 1, // المستخدم الافتراضي
+            'receivedByUserId': _currentUser?.id ?? 1,
             'paidAt': now.toIso8601String(),
             'notes': 'عربون استلام الجهاز',
           });
@@ -239,7 +249,7 @@ class _IntakeWizardScreenState extends State<IntakeWizardScreen> {
 
         // 6. تدوين العملية في سجل الرقابة audit_logs
         await txn.insert('audit_logs', {
-          'userId': 1,
+          'userId': _currentUser?.id ?? 1,
           'action': 'INTAKE_DEVICE',
           'entityName': 'repair_records',
           'entityId': recordId.toString(),

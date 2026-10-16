@@ -7,7 +7,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 /// المساعد المركزي لقاعدة بيانات SQLite المحلية - مصدر الحقيقة الوحيد
 class DatabaseHelper {
   static const String dbName = 'sabr_electronics.db';
-  static const int dbVersion = 1;
+  static const int dbVersion = 2;
 
   DatabaseHelper._internal();
   static final DatabaseHelper instance = DatabaseHelper._internal();
@@ -276,11 +276,44 @@ class DatabaseHelper {
       });
     });
 
+    // إنشاء الفهارس لتحسين سرعة الاستعلامات والبحث
+    _createIndexes(batch);
+
     await batch.commit(noResult: true);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // الترقية المتسلسلة بدون حذف الجداول (Zero Data Loss)
+    if (oldVersion < 2) {
+      final batch = db.batch();
+      _createIndexes(batch);
+      await batch.commit(noResult: true);
+    }
+  }
+
+  static void _createIndexes(Batch batch) {
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_repair_records_customer ON repair_records (customerId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_repair_records_device ON repair_records (deviceId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_repair_records_status ON repair_records (status);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_devices_customer ON devices (customerId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_device_images_device ON device_images (deviceId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_repair_items_record ON repair_items (repairRecordId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_payments_record ON payments (repairRecordId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_payments_customer ON payments (customerId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_spare_parts_code ON spare_parts (partCode);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_spare_parts_category ON spare_parts (category);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs (userId);');
+    batch.execute('CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs (createdAt);');
+  }
+
+  /// تنفيذ نقطة تفتيش للكتابة المسبقة لضمان مزامنة التغييرات من ملف WAL إلى ملف DB الرئيسي قبل النسخ الاحتياطي
+  Future<void> checkpoint() async {
+    final db = await database;
+    try {
+      await db.execute('PRAGMA wal_checkpoint(FULL);');
+    } catch (_) {
+      // قد لا يكون وضع WAL مفعلاً في بعض البيئات أو قواعد بيانات الذاكرة، يتم التجاهل بأمان
+    }
   }
 
   Future<void> close() async {

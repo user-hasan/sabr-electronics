@@ -330,17 +330,17 @@ class RepairRepositoryImpl implements RepairRepository {
       [repairRecordId],
     );
     final laborRes = await txn.rawQuery(
-      "SELECT SUM(totalPrice) AS laborTotal FROM repair_items WHERE repairRecordId = ? AND itemType = 'labor'",
+      "SELECT SUM(totalPrice) AS laborTotal FROM repair_items WHERE repairRecordId = ? AND (itemType = 'labor' OR itemType = 'labor_service')",
       [repairRecordId],
     );
 
     final partsCost = (partsRes.first['partsTotal'] as num?)?.toDouble() ?? 0.0;
     final laborCost = (laborRes.first['laborTotal'] as num?)?.toDouble() ?? 0.0;
 
-    // 2. قراءة الخصم والمدفوع
+    // 2. قراءة الخصم والمدفوع والتكلفة التقديرية
     final recRes = await txn.query(
       'repair_records',
-      columns: ['discountAmount', 'paidAmount'],
+      columns: ['discountAmount', 'paidAmount', 'estimatedCost'],
       where: 'id = ?',
       whereArgs: [repairRecordId],
       limit: 1,
@@ -350,8 +350,17 @@ class RepairRepositoryImpl implements RepairRepository {
 
     final discount = (recRes.first['discountAmount'] as num?)?.toDouble() ?? 0.0;
     final paidAmount = (recRes.first['paidAmount'] as num?)?.toDouble() ?? 0.0;
+    final estimatedCost = (recRes.first['estimatedCost'] as num?)?.toDouble() ?? 0.0;
 
-    final totalAmount = (partsCost + laborCost) - discount;
+    // إذا لم تكن هناك بنود مضافة بعد (قطع أو أجور يد)، يتم الحفاظ على التكلفة التقديرية كأساس
+    double calculatedTotal;
+    if (partsCost == 0.0 && laborCost == 0.0 && estimatedCost > 0) {
+      calculatedTotal = estimatedCost - discount;
+    } else {
+      calculatedTotal = (partsCost + laborCost) - discount;
+    }
+
+    final totalAmount = calculatedTotal > 0 ? calculatedTotal : 0.0;
     final remainingAmount = (totalAmount - paidAmount) > 0 ? (totalAmount - paidAmount) : 0.0;
 
     await txn.update(
@@ -359,13 +368,43 @@ class RepairRepositoryImpl implements RepairRepository {
       {
         'partsCost': partsCost,
         'laborCost': laborCost,
-        'totalAmount': totalAmount > 0 ? totalAmount : 0.0,
+        'totalAmount': totalAmount,
         'remainingAmount': remainingAmount,
         'updatedAt': DateTime.now().toIso8601String(),
       },
       where: 'id = ?',
       whereArgs: [repairRecordId],
     );
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDashboardStats() async {
+    final db = await dbHelper.database;
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+
+    final receivedTodayRes = await db.rawQuery(
+      "SELECT COUNT(*) as count FROM repair_records WHERE receivedAt LIKE ?",
+      ['$todayStr%'],
+    );
+    final inProgressRes = await db.rawQuery(
+      "SELECT COUNT(*) as count FROM repair_records WHERE status = ?",
+      [RepairStatus.inProgress.code],
+    );
+    final readyRes = await db.rawQuery(
+      "SELECT COUNT(*) as count FROM repair_records WHERE status = ?",
+      [RepairStatus.ready.code],
+    );
+    final debtRes = await db.rawQuery(
+      "SELECT SUM(remainingAmount) as totalDebt FROM repair_records WHERE status != ? AND status != ?",
+      [RepairStatus.delivered.code, RepairStatus.cancelled.code],
+    );
+
+    return {
+      'receivedToday': (receivedTodayRes.first['count'] as int?) ?? 0,
+      'inProgress': (inProgressRes.first['count'] as int?) ?? 0,
+      'ready': (readyRes.first['count'] as int?) ?? 0,
+      'totalDebt': (debtRes.first['totalDebt'] as num?)?.toDouble() ?? 0.0,
+    };
   }
 
   @override

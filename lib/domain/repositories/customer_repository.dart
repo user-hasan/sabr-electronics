@@ -9,4 +9,5 @@ abstract class CustomerRepository {
   Future<bool> updateCustomer(CustomerEntity customer);
   Future<bool> deleteCustomer(int id);
   Future<int> getCustomerCount();
+  Future<Map<String, dynamic>> getCustomerStats(int customerId);
 }

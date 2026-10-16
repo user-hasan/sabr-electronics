@@ -43,3 +43,18 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# SQLite Databases & Local Storage
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment & Secret Keys
+.env*
+!.env.example
+
+# Local Backups & Exports
+/backups/
+*.zip
+*.tar.gz

@@ -7,10 +7,49 @@ import '../../../../domain/enums/repair_status.dart';
 import '../../auth_lock/screens/pin_lock_dialog.dart';
 import '../../devices/screens/intake_wizard_screen.dart';
 import '../../inventory/screens/spare_parts_list_screen.dart';
+import '../../../../data/repositories/repair_repository_impl.dart';
 import '../../repairs/screens/repairs_list_screen.dart';
+import '../../settings/screens/settings_screen.dart';
+import '../../customers/screens/customers_list_screen.dart';
+import '../../audit/screens/audit_log_screen.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  final _repairRepo = RepairRepositoryImpl();
+  Map<String, dynamic> _stats = {
+    'receivedToday': 0,
+    'inProgress': 0,
+    'ready': 0,
+    'totalDebt': 0.0,
+  };
+  bool _isLoadingStats = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    setState(() => _isLoadingStats = true);
+    try {
+      final stats = await _repairRepo.getDashboardStats();
+      if (mounted) {
+        setState(() {
+          _stats = stats;
+          _isLoadingStats = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingStats = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,29 +76,46 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppStrings.appName,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  AppStrings.appSubtitle,
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondaryDark),
-                ),
-              ],
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    AppStrings.appName,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    AppStrings.appSubtitle,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: AppColors.textSecondaryDark),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
           IconButton(
+            tooltip: 'تحديث المؤشرات',
+            icon: _isLoadingStats
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                  )
+                : const Icon(Icons.refresh_rounded, color: AppColors.primary),
+            onPressed: _loadStats,
+          ),
+          IconButton(
             tooltip: 'سجل وتذاكر الصيانة',
             icon: const Icon(Icons.receipt_long_rounded, color: AppColors.primary),
-            onPressed: () {
-              Navigator.of(context).push(
+            onPressed: () async {
+              await Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => const RepairsListScreen()),
               );
+              _loadStats();
             },
           ),
           IconButton(
@@ -72,9 +128,24 @@ class DashboardScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            tooltip: 'حالة الطابعة الحرارية',
-            icon: const Icon(Icons.bluetooth_connected_rounded, color: AppColors.primary),
-            onPressed: () {},
+            tooltip: 'سجل وإدارة العملاء',
+            icon: const Icon(Icons.people_alt_rounded, color: AppColors.primary),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const CustomersListScreen()),
+              );
+              _loadStats();
+            },
+          ),
+          IconButton(
+            tooltip: 'إعدادات النظام العامة',
+            icon: const Icon(Icons.settings_rounded, color: AppColors.primary),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+              _loadStats();
+            },
           ),
           IconButton(
             tooltip: 'قفل الشاشة السريع PIN',
@@ -104,10 +175,10 @@ class DashboardScreen extends StatelessWidget {
             children: [
               // شريط العملات السريع
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceDark,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppColors.borderDark),
                 ),
                 child: Wrap(
@@ -153,56 +224,60 @@ class DashboardScreen extends StatelessWidget {
                 children: [
                   _buildKpiCard(
                     title: 'مستلمة اليوم',
-                    count: '0',
+                    count: '${_stats['receivedToday'] ?? 0}',
                     subtitle: 'جاهز للاستقبال',
                     icon: Icons.inbox_rounded,
                     color: AppColors.statusReceived,
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const RepairsListScreen(initialStatus: RepairStatus.received),
                         ),
                       );
+                      _loadStats();
                     },
                   ),
                   _buildKpiCard(
                     title: 'قيد الصيانة الفنية',
-                    count: '0',
+                    count: '${_stats['inProgress'] ?? 0}',
                     subtitle: 'على طاولة العمل',
                     icon: Icons.handyman_rounded,
                     color: AppColors.statusInProgress,
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const RepairsListScreen(initialStatus: RepairStatus.inProgress),
                         ),
                       );
+                      _loadStats();
                     },
                   ),
                   _buildKpiCard(
                     title: 'جاهزة للتسليم',
-                    count: '0',
+                    count: '${_stats['ready'] ?? 0}',
                     subtitle: 'بانتظار العميل',
                     icon: Icons.verified_rounded,
                     color: AppColors.statusReady,
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const RepairsListScreen(initialStatus: RepairStatus.ready),
                         ),
                       );
+                      _loadStats();
                     },
                   ),
                   _buildKpiCard(
                     title: 'الديون المتبقية',
-                    count: '0 ر.ي',
+                    count: '${(_stats['totalDebt'] as num?)?.toStringAsFixed(0) ?? '0'} ر.ي',
                     subtitle: 'مستحقات التحصيل',
                     icon: Icons.account_balance_wallet_rounded,
                     color: AppColors.accent,
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute(builder: (context) => const RepairsListScreen()),
                       );
+                      _loadStats();
                     },
                   ),
                 ],
@@ -222,10 +297,11 @@ class DashboardScreen extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
+                      onPressed: () async {
+                        await Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => const IntakeWizardScreen()),
                         );
+                        _loadStats();
                       },
                       icon: const Icon(Icons.add_task_rounded),
                       label: const Text('استلام جهاز جديد'),
@@ -262,6 +338,41 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const CustomersListScreen()),
+                        );
+                        _loadStats();
+                      },
+                      icon: const Icon(Icons.people_alt_rounded),
+                      label: const Text('سجل العملاء'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const AuditLogScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.policy_rounded),
+                      label: const Text('سجل الرقابة'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 24),
 
@@ -282,9 +393,9 @@ class DashboardScreen extends StatelessWidget {
                       cat.label,
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     ),
-                    backgroundColor: AppColors.surfaceDark,
+                    backgroundColor: AppColors.surfaceDarkElevated,
                     side: const BorderSide(color: AppColors.borderDark),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   );
                 }).toList(),
               ),
@@ -314,10 +425,10 @@ class DashboardScreen extends StatelessWidget {
 
   Widget _buildCurrencyChip(String label, bool isSelected) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary.withValues(alpha: 0.15) : Colors.transparent,
-        borderRadius: BorderRadius.circular(6),
+        color: isSelected ? AppColors.primary.withValues(alpha: 0.18) : AppColors.surfaceDarkElevated,
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isSelected ? AppColors.primary : AppColors.borderDark,
           width: 1,
@@ -342,47 +453,84 @@ class DashboardScreen extends StatelessWidget {
     required Color color,
     VoidCallback? onTap,
   }) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondaryDark, fontWeight: FontWeight.w600),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.22), width: 1),
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.09),
+            AppColors.surfaceDark,
+          ],
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(13),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondaryDark,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    child: Icon(icon, size: 18, color: color),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    count,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryDark),
-                  ),
-                ],
-              ),
-            ],
+                    Container(
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+                      ),
+                      child: Icon(icon, size: 18, color: color),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      count,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textSecondaryDark,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

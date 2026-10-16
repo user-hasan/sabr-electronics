@@ -9,6 +9,8 @@ import '../../../../domain/entities/repair_record_entity.dart';
 import '../../../../domain/entities/spare_part_entity.dart';
 import '../../../../domain/enums/payment_method.dart';
 import '../../../../domain/enums/repair_status.dart';
+import '../../../../data/repositories/auth_repository_impl.dart';
+import '../../../../domain/entities/user_entity.dart';
 import '../../../../services/printing_service.dart';
 
 class RepairDetailsScreen extends StatefulWidget {
@@ -23,6 +25,8 @@ class RepairDetailsScreen extends StatefulWidget {
 class _RepairDetailsScreenState extends State<RepairDetailsScreen> {
   final _repairRepo = RepairRepositoryImpl();
   final _sparePartRepo = SparePartRepositoryImpl();
+  final _authRepo = AuthRepositoryImpl();
+  UserEntity? _currentUser;
 
   bool _isLoading = true;
   Map<String, dynamic>? _details;
@@ -36,10 +40,14 @@ class _RepairDetailsScreenState extends State<RepairDetailsScreen> {
   Future<void> _loadDetails() async {
     setState(() => _isLoading = true);
     final data = await _repairRepo.getRepairFullDetails(widget.repairId);
-    setState(() {
-      _details = data;
-      _isLoading = false;
-    });
+    final user = await _authRepo.getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _details = data;
+        _currentUser = user;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _updateStatus(RepairStatus newStatus) async {
@@ -356,7 +364,7 @@ class _RepairDetailsScreenState extends State<RepairDetailsScreen> {
         amount: amount,
         currency: record.currency,
         paymentMethod: method,
-        receivedByUserId: 1, // Default Admin
+        receivedByUserId: _currentUser?.id ?? 1,
         paidAt: now,
         notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
       );

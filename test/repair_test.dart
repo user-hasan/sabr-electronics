@@ -284,5 +284,62 @@ void main() {
       expect(msg, contains('تم تسليم جهازكم'));
       expect(msg, contains('الضمان'));
     });
+
+    test('الحفاظ على التكلفة التقديرية كأساس للإجمالي عند تطبيق خصم قبل إضافة بنود', () async {
+      final now = DateTime.now();
+
+      final custId = await db.insert('customers', {
+        'name': 'مركز الإيمان للأجهزة',
+        'customerType': 'individual',
+        'phone': '771999888',
+        'createdAt': now.toIso8601String(),
+        'updatedAt': now.toIso8601String(),
+      });
+
+      final devId = await db.insert('devices', {
+        'customerId': custId,
+        'category': 'amplifier',
+        'deviceType': 'مضخم صوت باور',
+        'brand': 'Yamaha',
+        'model': 'P7000S',
+        'createdAt': now.toIso8601String(),
+        'updatedAt': now.toIso8601String(),
+      });
+
+      final record = RepairRecordEntity(
+        recordNumber: 'REC-2026-0002',
+        customerId: custId,
+        deviceId: devId,
+        receivedAt: now,
+        status: RepairStatus.received,
+        problemDescription: 'قاطع قناة يمنى',
+        currency: AppCurrency.yer,
+        estimatedCost: 20000,
+        totalAmount: 20000,
+        paidAmount: 5000,
+        remainingAmount: 15000,
+        createdAt: now,
+        updatedAt: now,
+      );
+      final repairId = await db.insert('repair_records', record.toMap());
+
+      // تطبيق خصم 2000 قبل إضافة أي بنود -> يجب أن يصبح الإجمالي 18000 والمتبقي 13000
+      final discountOk = await repairRepo.updateDiscount(repairId, 2000);
+      expect(discountOk, isTrue);
+
+      final repAfterDiscount = await repairRepo.getRepairById(repairId);
+      expect(repAfterDiscount!.discountAmount, equals(2000.0));
+      expect(repAfterDiscount.totalAmount, equals(18000.0));
+      expect(repAfterDiscount.remainingAmount, equals(13000.0));
+    });
+
+    test('استعلام إحصائيات لوحة التحكم getDashboardStats بدقة', () async {
+      final stats = await repairRepo.getDashboardStats();
+      expect(stats, contains('receivedToday'));
+      expect(stats, contains('inProgress'));
+      expect(stats, contains('ready'));
+      expect(stats, contains('totalDebt'));
+      expect(stats['totalDebt'], isA<double>());
+    });
   });
 }

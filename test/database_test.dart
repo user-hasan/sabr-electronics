@@ -7,6 +7,7 @@ import 'package:sabr_electronics/domain/entities/repair_record_entity.dart';
 import 'package:sabr_electronics/domain/enums/app_currency.dart';
 import 'package:sabr_electronics/domain/enums/device_category.dart';
 import 'package:sabr_electronics/domain/enums/repair_status.dart';
+import 'package:sabr_electronics/data/datasources/local/database_helper.dart';
 
 void main() {
   late Database db;
@@ -279,5 +280,9 @@ void main() {
     expect(fetched.totalAmount, 19000.0);
     expect(fetched.remainingAmount, 9000.0);
     expect(fetched.currency, AppCurrency.yer);
+  });
+
+  test('Verify DatabaseHelper dbVersion is upgraded to 2', () async {
+    expect(DatabaseHelper.dbVersion, equals(2));
   });
 }

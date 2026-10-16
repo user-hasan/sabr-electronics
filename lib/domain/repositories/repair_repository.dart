@@ -17,6 +17,7 @@ abstract class RepairRepository {
   Future<int> recordPayment(PaymentEntity payment);
   Future<List<PaymentEntity>> getPaymentsForRepair(int repairRecordId);
   Future<bool> updateDiscount(int repairId, double discountAmount);
+  Future<Map<String, dynamic>> getDashboardStats();
   String generateWhatsAppMessage({
     required RepairRecordEntity record,
     required String customerName,

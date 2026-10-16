@@ -93,4 +93,27 @@ class CustomerRepositoryImpl implements CustomerRepository {
     final res = await db.rawQuery('SELECT COUNT(*) as count FROM customers');
     return (res.first['count'] as int?) ?? 0;
   }
+
+  @override
+  Future<Map<String, dynamic>> getCustomerStats(int customerId) async {
+    final db = await dbHelper.database;
+    final deviceRes = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM devices WHERE customerId = ?',
+      [customerId],
+    );
+    final repairRes = await db.rawQuery(
+      'SELECT COUNT(*) as count, SUM(totalAmount - paidAmount) as debt FROM repair_records WHERE customerId = ?',
+      [customerId],
+    );
+
+    final deviceCount = (deviceRes.first['count'] as int?) ?? 0;
+    final repairCount = (repairRes.first['count'] as int?) ?? 0;
+    final debt = (repairRes.first['debt'] as num?)?.toDouble() ?? 0.0;
+
+    return {
+      'deviceCount': deviceCount,
+      'repairCount': repairCount,
+      'debt': debt > 0 ? debt : 0.0,
+    };
+  }
 }
